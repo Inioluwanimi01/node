@@ -1,11 +1,19 @@
+// dotenv, deployment, api testing, email sending
+
 const express = require('express')
 const app = express()
 const ejs = require('ejs')
+const dotenv = require('dotenv')
+dotenv.config()
 const mongoose = require('mongoose')
 app.use(express.urlencoded({extended: true}))
 app.set("view engine", "ejs")
 
-const URI = "mongodb+srv://fadarerodha66:Rhoda111@cluster0.k0vzz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+const URI = process.dotenv.MONGO_DB_URI
+// environment variable
+
+console.log(process.env.MONGO_DB_URI)
 
 // URI -Uniform Resource Identifier
 // connect to mongodb
@@ -19,7 +27,7 @@ console.log("Mongodb has started successfully")
 
 const PORT = 5500
 
-let regUser =[]
+let allUsers =[]
 
 let studentArray = [
     {firstname: "Heritage", lastname: "SQI", age: 20, isMarried: false},
@@ -29,30 +37,33 @@ let studentArray = [
     {firstname: "Ola", lastname: "SQI", age: 30, isMarried: true},
 ]
 
-app.get('/', (req, res)=>{
-    // res.send("Welcome to node class by Heritage")
-    // res.send(studentArray)
-    // res.sendFile(__dirname + '/index.html')
-    // Templating engine
-    // console.log(__dirname)
 
-    res.render("index")
+
+
+app.get('/all-users', (req, res)=>{
+    userModel.find()
+    .then((users)=>{
+        // console.log(users)
+        res.render("allUsers", {allUsers: users})
+
+    })
 })
 
-app.get('/dashboard', (req, res)=>{
-    res.render("dashboard", {name: "Tolu",  gender: 'male'})
-})
-
-app.get('/signup', (req, res)=>{
-    res.render("signup")
-    console.log('this is correct')
-})
 
 app.post('/register', (req, res)=>{
-    console.log("its working for register")
-    console.log(req.body)
-    regUser.push(req.body)
-    res.send("User registered successfully")
+    // console.log("its working for register")
+    let form = new userModel(req.body)
+    form.save()
+    .then(()=>{
+        console.log("User info saved successfully")
+    })
+    .catch((err)=>{
+        console.log(err, "User Info not saved")
+    })
+    // console.log(req.body)
+    // regUser.push(req.body)
+    res.redirect('/all-users')
+    // res.send("User registered successfully")
 
 })
 
